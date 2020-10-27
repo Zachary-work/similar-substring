@@ -9,7 +9,7 @@ This library is implemented based on [Evolutionary Distance algorithm](https://c
 - Search for the most similar part of the string by the given pattern
 - Return all of the parts if there is more than one most part which is scored the highest mark in terms of similarity
 
-# Installation
+## Installation
 Install using NPM
 ```sh
 npm install similarSubstring --save
@@ -20,7 +20,7 @@ Import to your code
 import similarSubstring from 'similarSubstring';
 ```
 
-# Example
+## Example
 #### Usage
 ```
 import similarSubstring from 'similarSubstring';
