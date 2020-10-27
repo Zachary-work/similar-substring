@@ -26,7 +26,7 @@ import similarSubstring from 'similar-substring';
 import similarSubstring from 'similar-substring';
 
 // Your code here
-const result = similarSubstring("mod", "I am coding");
+const result = similarSubstring("I am coding", "mod");
 ```
 
 #### Output
