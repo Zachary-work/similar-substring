@@ -1,5 +1,5 @@
 import flatMap = require('lodash.flatmap');
-import uniqby = require('lodash.uniqby');
+import uniqBy = require('lodash.uniqby');
 import uniq = require('lodash.uniq');
 
 
@@ -19,6 +19,25 @@ interface Grid {
     position: GridPosition;
 }
 
+interface ResultRange{
+    startIndex: number;
+    endIndex: number;
+}
+
+interface SimilarSubstringResult {
+    similarity: number;
+    items: ResultItem[];
+}
+
+interface ResultItem {
+    substring: string;
+    range: ResultRange;
+}
+
+interface SimilarSubstringOption {
+    debug: boolean
+}
+
 /**
  * @example
  * // return [est]
@@ -26,7 +45,16 @@ interface Grid {
  * @param text {String} The text/paragraph input you want to perform the searching
  * @param pattern {String} The string pattern you are looking for in the text
  */
-const similarSubstring = (text: string, pattern: string) => {
+const similarSubstring = (text: string, pattern: string, options: SimilarSubstringOption = {debug: false}) => {
+    if(text == null){
+        throw new Error("Invalid text input");
+    }
+    if(pattern == null){
+        throw new Error("Invalid pattern input");
+    }
+    if(text.length == 0){
+        return []
+    }
     var dp: number[][] = [];
     const numOfRow = pattern.length + 1;
     const numOfCol = text.length + 1;
@@ -45,9 +73,13 @@ const similarSubstring = (text: string, pattern: string) => {
             const left: number = dp[row][col-1];
             const topLeft: number = dp[row-1][col-1];
             const base = Math.min(top, left, topLeft);
-            const current = (text.charAt(col) === pattern.charAt(row-1)) ? 0 : 1;
+            const current = (text.charAt(col-1) === pattern.charAt(row-1)) ? 0 : 1;
             dp[row][col] = base + current;
         }
+    }
+
+    if(options.debug){
+        console.table(dp);
     }
 
     const minDistance: number = Math.min(...dp[numOfRow - 1]);
@@ -59,29 +91,46 @@ const similarSubstring = (text: string, pattern: string) => {
     }, []);
 
     const traceResult: GridPosition[][] = flatMap(minDistanceCols, (col) => {
-        return _trace(dp, numOfRow -1, col)
+        return _trace([], dp, numOfRow -1, col)
     });
 
-    const paths = traceResult.map((path: GridPosition[]) => {
+    const paths: number[][] = traceResult.map((path: GridPosition[]) => {
         return path.map(position => position.col);
     });
 
-    const clearPaths = paths.map(path => uniq(path));
-    const uniqPaths = uniqby(clearPaths, (path) => {return path.toString()});
+    const clearRanges = paths.map(path => [path[0], path[path.length - 1]])
+        .filter((range) => range[1] >= range[0])
+        .filter((range) => text.length >= range[0]);
+    const uniqRanges = uniqBy(clearRanges, (range) => range.toString());
 
-    const words = uniqPaths.map((path) => {
+    const items : ResultItem[] = uniqRanges.map((range: number[]) => {
         let word = "";
-        path.forEach((col) => {
-            word = word.concat(text.charAt(col))
-        });
-        return word;
+        for(let i = range[0] - 1; i <= range[1] - 1; i++){
+            word = word.concat(text.charAt(i));
+        }
+        return {
+            substring: word,
+            range: {
+                startIndex: range[0] - 1,
+                endIndex: range[1] - 1,
+            }
+        }
     });
-    return words;
+    return {
+        similarity: (pattern.length - minDistance) / pattern.length,
+        items
+    }
 }
 
-const _trace = (dp: number[][], row: number, col: number): GridPosition[][] => {
+const _trace = (mem: GridPosition[][][][], dp: number[][], row: number, col: number): GridPosition[][] => {
     if(row == 0) {
         return [[]];
+    }
+    if(col == 0) {
+        return [[]];
+    }
+    if(mem[row] != null && mem[row][col] != null){
+        return mem[row][col];
     }
     const top: Grid = {value: dp[row-1][col], position: {row: row-1, col: col}};
     const left: Grid = {value: (col > 0) ? dp[row][col-1]: INVALID, position: {row: row, col: col-1}};
@@ -91,14 +140,18 @@ const _trace = (dp: number[][], row: number, col: number): GridPosition[][] => {
     const minFactors: Grid[] = factors.filter(factor => factor.value === min);
 
     const result: GridPosition[][] = flatMap(minFactors, (factor: Grid) => {
-        const paths: GridPosition[][] = _trace(dp, factor.position.row, factor.position.col);
+        const paths: GridPosition[][] = _trace(mem, dp, factor.position.row, factor.position.col);
         return paths.map((path: GridPosition[]) => {
-            return [...path, {row, col}]
+            return [...path, {row, col}];
         });
     });
+    if(mem[row] == null){
+        mem[row] = [];
+    }
+    mem[row][col] = result;
 
     return result;
 
 }
 
-console.log(similarSubstring("Lorem Ipsum is simply dummy text of the printing and typesetting industry", "io"));
+export { similarSubstring };
