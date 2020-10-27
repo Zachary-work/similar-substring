@@ -17,13 +17,13 @@ npm install similar-substring --save
 
 Import to your code
 ```
-import similarSubstring from 'similar-substring';
+import { similarSubstring } from 'similar-substring';
 ```
 
 ## Example
 #### Usage
 ```
-import similarSubstring from 'similar-substring';
+import { imilarSubstring } from 'similar-substring';
 
 // Your code here
 const result = similarSubstring("I am coding", "mod");
