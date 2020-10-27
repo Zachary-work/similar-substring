@@ -23,7 +23,7 @@ import { similarSubstring } from 'similar-substring';
 ## Example
 #### Usage
 ```
-import { imilarSubstring } from 'similar-substring';
+import { similarSubstring } from 'similar-substring';
 
 // Your code here
 const result = similarSubstring("I am coding", "mod");
