@@ -12,18 +12,18 @@ This library is implemented based on [Evolutionary Distance algorithm](https://c
 ## Installation
 Install using NPM
 ```sh
-npm install similarSubstring --save
+npm install similar-substring --save
 ```
 
 Import to your code
 ```
-import similarSubstring from 'similarSubstring';
+import similarSubstring from 'similar-substring';
 ```
 
 ## Example
 #### Usage
 ```
-import similarSubstring from 'similarSubstring';
+import similarSubstring from 'similar-substring';
 
 // Your code here
 const result = similarSubstring("mod", "I am coding");
